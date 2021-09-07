@@ -2,8 +2,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const weatherData = require('./data/weather.json');
+// const weatherData = require('./data/weather.json');
 const { request, response } = require('express');
+const axios=require('axios');
 
 const server = express();
 server.use(cors());
@@ -21,40 +22,33 @@ server.get('/test', (request, response) => {
 
 
 
-let weatherArr = [];
-// http://localhost:3010/weather?lat=47.6038321&lon=-122.3300624
+// let weatherArr = [];
+//http://localhost:3010/weather?&lat=38.123&lon=-78.543&key=5b8f444232ce467b8b2318c49f348f2d
 server.get('/weather', (req, res) => {
     const lat=req.query.lat;
     const lon=req.query.lon;
-    let result = weatherData.find((item) => {
-        if (item.lat === lat && item.lon === lon)
-         {
-            weatherArr = item.data.map((day) => {
-                const dayObj = new Forecast(day);
-                return dayObj;
-            })
+    let url=`https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&key=${process.env.WEATHER_API_KEY}`
 
-        }
-    })
-        console.log(weatherArr);
-        res.send(weatherArr);
+axios.get(url).then(result => {
+    console.log(result);
+})
+
     });
-
- 
-   
 
 
 function Forecast (day) {
     this.discription = `Low of ${day.low_temp} , high of ${day.high_temp} with ${day.weather.description}`
-    this.date = day.valid_date;
+    this.date = day.datetime;
 }
 
 
 
-server.get('*', (req, res) => {
-    res.status(404).send('Sorry, page not found');
-})
 
 server.listen(PORT, () => {
     console.log(`I'm listening at${PORT}`);
+})
+
+
+server.get('*', (req, res) => {
+    res.status(404).send('Sorry, page not found');
 })

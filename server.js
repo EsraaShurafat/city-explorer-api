@@ -67,8 +67,15 @@ function Forecast (day) {
 
 //https://api.themoviedb.org/3/search/movie?query=name&api_key=d8267ae22650e0d58d2c15651f5229ce
 // http://localhost:3010/movies?name=''
+let memoryMovie={};
  function getMovieData (req, res){
 let query=req.query.name;
+if (memoryMovie[query]!==undefined) {
+    
+    res.send(memoryMovie[query]);
+    
+}
+else{
 let url=`https://api.themoviedb.org/3/search/movie?query=${query}&api_key=${process.env.MOVIES_API_KEY}`;
 
 axios
@@ -77,9 +84,10 @@ axios
     // console.log(result.data.results);
     let newDay=result.data.results.map((item)=>{
         return new  Region(item);
+       
 
     });
-
+    memoryMovie[query]=newDay;
     res.send(newDay)
 
 })
@@ -87,7 +95,8 @@ axios
 .catch(err =>{
     console.log(err); 
 });
-
+}
+// console.log(memoryMovie)
 function Region (day) {
     (this.title=day.original_title),
     (this.overview=day.overview),
